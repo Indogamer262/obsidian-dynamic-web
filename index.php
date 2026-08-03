@@ -31,13 +31,13 @@ if (!file_exists($targetFile)) {
 function resolve_obsidian_link($target, $currentDir, $vaultDir) {
     // 1. Try exact match from current dir
     $directPath = $currentDir . '/' . ltrim($target, '/');
-    if (file_exists($directPath)) return $directPath;
-    if (file_exists($directPath . '.md')) return $directPath . '.md';
+    if (is_file($directPath)) return $directPath;
+    if (is_file($directPath . '.md')) return $directPath . '.md';
 
     // 2. Try exact match from vault dir
     $vaultDirect = $vaultDir . '/' . ltrim($target, '/');
-    if (file_exists($vaultDirect)) return $vaultDirect;
-    if (file_exists($vaultDirect . '.md')) return $vaultDirect . '.md';
+    if (is_file($vaultDirect)) return $vaultDirect;
+    if (is_file($vaultDirect . '.md')) return $vaultDirect . '.md';
 
     // 3. Use shortest-path recursive search as fallback
     $basename = basename($target);
@@ -107,29 +107,45 @@ function search_file_recursive($target, $dir, $skipDirs, $isMd) {
 
 // 1. Embeds: ![[file]]
 $markdownContent = preg_replace_callback('/!\[\[([^\]]+)\]\]/', function($matches) use ($currentDir, $vaultDir) {
-    $target = $matches[1];
+    $content = $matches[1];
+    $content = str_replace('\|', '|', $content); // Unescape \|
+    $parts = explode('|', $content, 2);
+    $target = trim($parts[0]);
+    $alias = isset($parts[1]) ? trim($parts[1]) : '';
+    
     $resolved = resolve_obsidian_link($target, $currentDir, $vaultDir);
     if ($resolved) {
         $ext = strtolower(pathinfo($resolved, PATHINFO_EXTENSION));
         $webPath = str_replace('\\', '/', $resolved);
         
+        // Handle width/height from alias
+        $style = '';
+        if (is_numeric($alias)) {
+            $style = 'width: ' . htmlspecialchars($alias) . 'px;';
+        } elseif (preg_match('/^(\d+)x(\d+)$/', $alias, $dimMatches)) {
+            $style = 'width: ' . $dimMatches[1] . 'px; height: ' . $dimMatches[2] . 'px;';
+        }
+
         if (in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'])) {
-            return '<img src="' . htmlspecialchars($webPath) . '" alt="' . htmlspecialchars($target) . '" class="obsidian-embed image-embed">';
+            return '<img src="' . htmlspecialchars($webPath) . '" alt="' . htmlspecialchars($target) . '" class="obsidian-embed image-embed" style="' . $style . '">';
         } elseif ($ext === 'pdf') {
-            return '<iframe src="' . htmlspecialchars($webPath) . '" class="obsidian-embed pdf-embed" width="100%" height="600px"></iframe>';
+            return '<iframe src="' . htmlspecialchars($webPath) . '" class="obsidian-embed pdf-embed" style="width: 100%; height: 600px; ' . $style . '"></iframe>';
         } else {
             return '<a href="' . htmlspecialchars($webPath) . '" class="obsidian-embed file-embed" download>' . htmlspecialchars($target) . '</a>';
         }
     }
-    return '<span class="is-unresolved">![[' . htmlspecialchars($target) . ']]</span>';
+    
+    $unresolvedAlias = $alias !== '' ? '&#124;' . htmlspecialchars($alias) : '';
+    return '<span class="is-unresolved">![[' . htmlspecialchars($target) . $unresolvedAlias . ']]</span>';
 }, $markdownContent);
 
 // 3. Wikilinks: [[file]] or [[file|Alias]]
 $markdownContent = preg_replace_callback('/\[\[([^\]]+)\]\]/', function($matches) use ($currentDir, $vaultDir) {
     $content = $matches[1];
+    $content = str_replace('\|', '|', $content); // Unescape \|
     $parts = explode('|', $content, 2);
-    $target = $parts[0];
-    $alias = isset($parts[1]) ? $parts[1] : $target;
+    $target = trim($parts[0]);
+    $alias = isset($parts[1]) ? trim($parts[1]) : $target;
     
     $resolved = resolve_obsidian_link($target, $currentDir, $vaultDir);
     if ($resolved) {
@@ -179,12 +195,35 @@ if (is_dir('css-snippets')) {
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
-        body { 
+        html, body {
             margin: 0; padding: 20px; font-family: var(--font-text); 
             background-color: var(--background-primary, #1e1e1e); 
             color: var(--text-normal, #dcddde); 
+            overflow-y: auto !important; /* Allow scrolling */
+            height: 100% !important;
+            min-height: 100vh !important;
+            box-sizing: border-box;
         }
-        .markdown-rendered { max-width: 800px; margin: 0 auto; line-height: 1.6; }
+        .markdown-rendered { 
+            max-width: 800px; /* Revert to 800px as user preferred */
+            margin: 0 auto; 
+            line-height: 1.6; 
+        }
+        
+        /* Table Overrides */
+        .markdown-rendered table {
+            width: 100%;
+            display: table !important;
+            overflow: visible !important;
+        }
+        .markdown-rendered tbody > tr > td, 
+        .markdown-rendered thead > tr > th {
+            white-space: normal !important;
+            word-break: normal !important;
+            overflow: visible !important;
+            height: auto !important;
+            padding: 12px !important;
+        }
         .is-unresolved { color: var(--text-muted); opacity: 0.6; }
         a.internal-link { text-decoration: none; color: var(--text-accent); }
         a.internal-link:hover { text-decoration: underline; }
