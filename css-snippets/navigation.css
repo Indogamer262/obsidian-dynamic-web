@@ -1,0 +1,8 @@
+.nav-bar {
+    border:1px solid white;margin:10px 0 10px 0;padding:8px;border-radius:4px;display:inline-block;
+    width:100%;
+}
+
+.nav-bar a.internal-link {
+	color: white;
+}

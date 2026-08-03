@@ -1,0 +1,21 @@
+/* Styling untuk link native Obsidian yang dibungkus class nav-card */
+.nav-card a.internal-link {
+    display: inline-block;
+    width: 100%;
+    padding: 12px;
+    margin: 1px 0 8px 0;
+    background-color: #3A3A3A;
+    color: #ffffff !important;
+    text-decoration: none !important;
+    border-radius: 4px;
+    border: none;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+/* Efek hover saat kursor diarahkan ke tombol */
+.nav-card a.internal-link:hover {
+    background-color: #4A4A4A;
+    text-decoration: none !important;
+}

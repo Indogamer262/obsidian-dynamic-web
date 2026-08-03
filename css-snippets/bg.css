@@ -1,0 +1,12 @@
+/* Mengubah background utama halaman/editor Obsidian */
+body {
+    --background-primary: #282a40;
+    --background-primary-alt: #222538; /* Warna pendukung/alt yang sedikit lebih gelap */
+}
+
+/* Memastikan area editor dan reading view mengikuti warna baru */
+.markdown-source-view,
+.markdown-preview-view {
+    /* background-color: var(--background-primary) !important; */
+    background-color: #282a40 !important;
+}
