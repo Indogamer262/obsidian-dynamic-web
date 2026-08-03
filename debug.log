@@ -1,0 +1,7 @@
+PHP Fatal error:  Uncaught Error: Call to undefined function resolve_obsidian_link() in /home/chelsea/Documents/Projects/obsidian-dynamic-web/index.php:152
+Stack trace:
+#0 [internal function]: {closure:/home/chelsea/Documents/Projects/obsidian-dynamic-web/index.php:145}()
+#1 /home/chelsea/Documents/Projects/obsidian-dynamic-web/index.php(145): preg_replace_callback()
+#2 Command line code(1): require('...')
+#3 {main}
+  thrown in /home/chelsea/Documents/Projects/obsidian-dynamic-web/index.php on line 152

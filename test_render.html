@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>index</title>
+    
+    <!-- Obsidian Base CSS -->
+    <link rel="stylesheet" href="app.css">
+    
+    <!-- Snippets CSS -->
+        <link rel="stylesheet" href="css-snippets/bg.css">
+        <link rel="stylesheet" href="css-snippets/button.css">
+        <link rel="stylesheet" href="css-snippets/dl-btn.css">
+        <link rel="stylesheet" href="css-snippets/navigation.css">
+    
+    <!-- Highlight.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    
+    <style>
+        html, body {
+            margin: 0; padding: 20px; font-family: var(--font-text); 
+            background-color: var(--background-primary, #1e1e1e); 
+            color: var(--text-normal, #dcddde); 
+            overflow-y: auto !important; /* Allow scrolling */
+            height: 100% !important;
+            min-height: 100vh !important;
+            box-sizing: border-box;
+        }
+        .markdown-rendered { 
+            max-width: 800px; /* Revert to 800px as user preferred */
+            margin: 0 auto; 
+            line-height: 1.6; 
+        }
+        
+        /* Table Overrides */
+        .markdown-rendered table {
+            width: 100%;
+            display: table !important;
+            overflow: visible !important;
+        }
+        .markdown-rendered tbody > tr > td, 
+        .markdown-rendered thead > tr > th {
+            white-space: normal !important;
+            word-break: normal !important;
+            overflow: visible !important;
+            height: auto !important;
+            padding: 12px !important;
+        }
+        .is-unresolved { color: var(--text-muted); opacity: 0.6; }
+        a.internal-link { text-decoration: none; color: var(--text-accent); }
+        a.internal-link:hover { text-decoration: underline; }
+        
+        /* Callout Styling */
+        .callout {
+            border: 1px solid rgba(var(--callout-color), 0.25);
+            border-radius: 4px;
+            padding: 12px;
+            margin: 1em 0;
+            background-color: rgba(var(--callout-color), 0.1);
+        }
+        .callout-title {
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            color: rgb(var(--callout-color));
+        }
+        .callout-title-inner { color: var(--text-normal); margin-left: 8px; }
+        
+        /* Fold Icon */
+        .callout-fold {
+            width: 16px; height: 16px;
+            transition: transform 0.2s;
+            color: var(--text-muted);
+        }
+        details.callout-collapsible > summary.callout-title { cursor: pointer; list-style: none; }
+        details.callout-collapsible > summary.callout-title::-webkit-details-marker { display: none; }
+        details.callout-collapsible[open] > summary.callout-title > .callout-fold { transform: rotate(90deg); }
+        details.callout-collapsible > .callout-content { margin-top: 8px; padding-left: 24px; }
+        
+        /* Callout Colors */
+        .callout[data-callout="info"], .callout[data-callout="todo"] { --callout-color: 8, 109, 221; }
+        .callout[data-callout="note"] { --callout-color: 8, 109, 221; }
+        .callout[data-callout="summary"], .callout[data-callout="tip"] { --callout-color: 0, 191, 188; }
+        .callout[data-callout="success"] { --callout-color: 8, 185, 78; }
+        .callout[data-callout="warning"], .callout[data-callout="question"] { --callout-color: 236, 117, 0; }
+        .callout[data-callout="error"], .callout[data-callout="bug"], .callout[data-callout="fail"] { --callout-color: 233, 49, 71; }
+        .callout[data-callout="example"] { --callout-color: 120, 82, 238; }
+        .callout[data-callout="quote"] { --callout-color: 158, 158, 158; }
+        
+        img.obsidian-embed { max-width: 100%; border-radius: 4px; }
+    </style>
+</head>
+<body class="theme-dark">
+    <div class="markdown-rendered" id="content"></div>
+
+    <textarea id="raw-markdown" style="display:none;">---
+title: Midnight Home
+---
+
+
+| &lt;img src=&quot;vault/pexels-kelly-1179532-2688664.jpg&quot; alt=&quot;pexels-kelly-1179532-2688664.jpg&quot; class=&quot;obsidian-embed image-embed&quot; style=&quot;width: 240px;&quot;&gt; | &lt;span style=&quot;font-size:26px;font-weight:bold;&quot;&gt;Midnight&lt;/span&gt;&lt;br&gt;&lt;span style=&quot;font-weight: normal;&quot;&gt;Maranatha Infinite Discoveries at Night&lt;/span&gt;&lt;br&gt;&lt;br&gt;&lt;div style=&quot;width:400px;&quot;&gt;&lt;b&gt;Midnight&lt;/b&gt; &lt;span style=&quot;font-weight: normal;&quot;&gt;adalah situs pembelajaran Teknik Informatika yang dibuat oleh 2472008. Situs ini gratis dan dapat diakses oleh semua orang!&lt;/span&gt;&lt;/div&gt; |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+&lt;div style=&quot;border:1px solid white;margin:10px 0 10px 0;padding:8px;border-radius:4px;&quot;&gt;Home/&lt;/div&gt;
+
+---
+&lt;div class=&quot;callout&quot; data-callout=&quot;info&quot;&gt;&lt;div class=&quot;callout-title&quot;&gt;&lt;div class=&quot;callout-icon&quot;&gt;&lt;/div&gt;&lt;div class=&quot;callout-title-inner&quot;&gt;Selamat datang di Midnight v2&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;callout-content&quot;&gt;
+ Ini adalah tampilan terbaru dari Midnight, lebih ringan, lebih efisien!
+ Midnight kali ini berbasis `Obsidian`
+&lt;/div&gt;&lt;/div&gt;
+
+# Materi Belajar
+&lt;span class=&quot;nav-card&quot;&gt;&lt;a class=&quot;internal-link is-unresolved&quot;&gt;🖿 Semester 3&lt;/a&gt;&lt;/span&gt;
+&lt;span class=&quot;nav-card&quot;&gt;&lt;a class=&quot;internal-link is-unresolved&quot;&gt;🖿 Semester 4&lt;/a&gt;&lt;/span&gt;
+&lt;span class=&quot;nav-card&quot;&gt;&lt;a class=&quot;internal-link is-unresolved&quot;&gt;🖿 Semester 5&lt;/a&gt;&lt;/span&gt;
+
+---
+# Pengumuman
+&lt;details class=&quot;callout callout-collapsible&quot; data-callout=&quot;summary&quot; &gt;&lt;summary class=&quot;callout-title&quot;&gt;&lt;svg class=&quot;callout-fold&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;24&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;&gt;&lt;polyline points=&quot;9 18 15 12 9 6&quot;&gt;&lt;/polyline&gt;&lt;/svg&gt;&lt;div class=&quot;callout-icon&quot;&gt;&lt;/div&gt;&lt;div class=&quot;callout-title-inner&quot;&gt;Kalender Akademik 2025-2026&lt;/div&gt;&lt;/summary&gt;&lt;div class=&quot;callout-content&quot;&gt;
+ &lt;img src=&quot;vault/Pasted image 20260730003235.jpg&quot; alt=&quot;Pasted image 20260730003235.jpg&quot; class=&quot;obsidian-embed image-embed&quot; style=&quot;width: 360px;&quot;&gt;
+&lt;/div&gt;&lt;/details&gt;&lt;/div&gt;
+
+
+---
+# Informasi Umum
+&lt;details class=&quot;callout callout-collapsible&quot; data-callout=&quot;note&quot; &gt;&lt;summary class=&quot;callout-title&quot;&gt;&lt;svg class=&quot;callout-fold&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;24&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;&gt;&lt;polyline points=&quot;9 18 15 12 9 6&quot;&gt;&lt;/polyline&gt;&lt;/svg&gt;&lt;div class=&quot;callout-icon&quot;&gt;&lt;/div&gt;&lt;div class=&quot;callout-title-inner&quot;&gt;Buku Panduan S1 Teknik Informatika v2024&lt;/div&gt;&lt;/summary&gt;&lt;div class=&quot;callout-content&quot;&gt;
+ &lt;iframe src=&quot;vault/Buku-Panduan-S1-Teknik-Informatika-v2024.pdf&quot; class=&quot;obsidian-embed pdf-embed&quot; style=&quot;width: 100%; height: 600px; &quot;&gt;&lt;/iframe&gt;
+&lt;/div&gt;&lt;/details&gt;&lt;/div&gt;
+
+
+&lt;details class=&quot;callout callout-collapsible&quot; data-callout=&quot;example&quot; &gt;&lt;summary class=&quot;callout-title&quot;&gt;&lt;svg class=&quot;callout-fold&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;24&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;&gt;&lt;polyline points=&quot;9 18 15 12 9 6&quot;&gt;&lt;/polyline&gt;&lt;/svg&gt;&lt;div class=&quot;callout-icon&quot;&gt;&lt;/div&gt;&lt;div class=&quot;callout-title-inner&quot;&gt;Daftar Mahasiswa Teknik Informatika 2024&lt;/div&gt;&lt;/summary&gt;&lt;div class=&quot;callout-content&quot;&gt;
+ 
+ |NRP|Nama|
+ |---|---|
+ |2472001|Aurellia Yemima Tomy|
+ |2472002|Steve Fernando Kurniawan|
+ |2472003|Maria Mayang Prihariyanti Panduwardani|
+ |2472005|Reyner Cornelius|
+ |2472006|Sean Patrick|
+ |2472007|Richard Vincentius Christian Dinata|
+ |2472008|Christian Anthony Hermawan|
+ |2472009|Lorencia Sharon Fadjar|
+ |2472010|Jonathan Valent Waluya|
+ |2472011|Dominic Xaviera|
+ |2472012|Jason|
+ |2472013|Javier Leander Wijaya|
+ |2472014|Archangela Sheilla Haryantto Sundjaya|
+ |2472015|Yohanes Alviedo Matondang|
+ |2472016|Calvin Ciswanto|
+ |2472017|Ricko|
+ |2472018|Kevin Kornelius Martadinata|
+ |2472019|Miracle Steven Gerrald|
+ |2472020|Juan Alexander Nathaniel|
+ |2472021|Ferdinand Brian Gondosupadmo|
+ |2472022|Bryan Christian Miercoles|
+ |2472023|Gearald Christoffer Freederich|
+ |2472024|Errvin Junius|
+ |2472025|Rafael Adiputra Hanjoyo|
+ |2472026|Valentino Hose|
+ |2472027|Yosua Juswandiputra|
+ |2472028|Ferdi Gunawan|
+ |2472029|Henry Ferdynand Budiana|
+ |2472030|Felicia Ivanna Widian|
+ |2472031||
+ |2472032|Jeryko Farelin Heliandra|
+ |2472033|Josephine Andrea Sanjaya|
+ |2472034|Theofilus Victor King|
+ |2472035|Dominic Samuel Onggowidjaja|
+ |2472036|Bertrand Audric Raytion|
+ |2472037|Simanullang Jonathan|
+ |2472038|Selv Septiani|
+ |2472039|Febrian Timotius Sugiarto|
+ |2472040|Francisco Valentino|
+ |2472041|Rico Dharmawan|
+ |2472042|Gavin Malik Setiawan|
+ |2472043|Keyren Estevania|
+ |2472044|Paulus Gilberth Mallisa|
+ |2472045|Marco Octavian|
+ |2472046|Brillian Viconaftali Tamalau|
+ |2472047|Sapira|
+ |2472048|Jayden Marvel Ethanael|
+ |2472049||
+ |2472050||
+ |2472051|Julius Santoso Setiawan|
+ |2472052|Hans Maulana|
+ |2472053|Teofilus Juan Puapadang|
+ |2472054||
+ |2472055|Hendika Putra|
+ |2472056|Effrain David Martoyo|
+ |2472057|Yoel Kristianto|
+ |2472058|Youlanda Nelva Haezer|
+ |2472059||
+ |2472060|Regiana|
+ |2472061|Jonny Feraldi Silitonga|
+ |2472063|Agustinus Lumbantoruan|
+ |2472064|Naufal Eka Fadhulurohman|
+ |2472065|Witney Calora Fredelica|
+ |2472066|Natasha Margareth Rumansara|
+ |2472901|Maliq Athaya Rinaldi|
+&lt;/div&gt;&lt;/details&gt;&lt;/div&gt;
+
+
+---
+
+&lt;div style=&quot;text-align:center;&quot;&gt;
+By 2472008 Christian A&lt;br&gt;
+Made with ❤️
+&lt;/div&gt;
+
+</textarea>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Init Mermaid
+            mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+
+            const rawMd = document.getElementById('raw-markdown').value;
+            
+            // Custom renderer for Mermaid in marked.js
+            const renderer = new marked.Renderer();
+            const originalCode = renderer.code.bind(renderer);
+            renderer.code = function(code, language, isEscaped) {
+                if (language === 'mermaid') {
+                    return '<div class="mermaid">' + code + '</div>';
+                }
+                return originalCode(code, language, isEscaped);
+            };
+            
+            marked.use({ renderer });
+            
+            // Allow marked to process HTML tags (so <span>[[halaman-lain]]</span> works seamlessly)
+            const html = marked.parse(rawMd, { breaks: true, gfm: true });
+            document.getElementById('content').innerHTML = html;
+
+            // Highlight syntax
+            hljs.highlightAll();
+
+            // Render Mermaid diagrams
+            setTimeout(() => {
+                mermaid.run({
+                    querySelector: '.mermaid'
+                });
+            }, 100);
+        });
+    </script>
+</body>
+</html>

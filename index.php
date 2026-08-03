@@ -29,9 +29,21 @@ if (!file_exists($targetFile)) {
 
 // Function to resolve Obsidian Link (Shortest Path Algorithm)
 function resolve_obsidian_link($target, $currentDir, $vaultDir) {
-    $ext = pathinfo($target, PATHINFO_EXTENSION);
+    // 1. Try exact match from current dir
+    $directPath = $currentDir . '/' . ltrim($target, '/');
+    if (file_exists($directPath)) return $directPath;
+    if (file_exists($directPath . '.md')) return $directPath . '.md';
+
+    // 2. Try exact match from vault dir
+    $vaultDirect = $vaultDir . '/' . ltrim($target, '/');
+    if (file_exists($vaultDirect)) return $vaultDirect;
+    if (file_exists($vaultDirect . '.md')) return $vaultDirect . '.md';
+
+    // 3. Use shortest-path recursive search as fallback
+    $basename = basename($target);
+    $ext = pathinfo($basename, PATHINFO_EXTENSION);
     $isMd = ($ext === '' || strtolower($ext) === 'md');
-    
+
     // Convert current dir to array of paths to check, starting from deepest
     $pathsToCheck = [];
     $curr = trim($currentDir, '/\\');
@@ -48,7 +60,7 @@ function resolve_obsidian_link($target, $currentDir, $vaultDir) {
     $checkedDirs = [];
     
     foreach ($pathsToCheck as $dir) {
-        $found = search_file_recursive($target, $dir, $checkedDirs, $isMd);
+        $found = search_file_recursive($basename, $dir, $checkedDirs, $isMd);
         if ($found) return $found;
         $checkedDirs[] = $dir;
     }
@@ -92,52 +104,8 @@ function search_file_recursive($target, $dir, $skipDirs, $isMd) {
 }
 
 // Process Markdown
-// 1. Callouts (Line by Line processing for multi-line blockquotes)
-$lines = explode("\n", $markdownContent);
-$inCallout = false;
-$calloutCollapsible = false;
-$newLines = [];
 
-foreach ($lines as $line) {
-    if (preg_match('/^>\s*\[!([a-zA-Z0-9-]+)\]([\+\-]?)(.*)$/', $line, $matches)) {
-        if ($inCallout) {
-            $newLines[] = $calloutCollapsible ? "</div></details></div>\n" : "</div></div>\n";
-        }
-        $inCallout = true;
-        $type = strtolower($matches[1]);
-        $collapse = $matches[2];
-        $title = trim($matches[3]);
-        if (empty($title)) $title = ucfirst($type);
-        
-        $calloutCollapsible = ($collapse === '+' || $collapse === '-');
-        $isOpen = ($collapse === '+');
-        
-        $html = '<div class="callout callout-'. htmlspecialchars($type) .'" data-callout="'.htmlspecialchars($type).'">';
-        if ($calloutCollapsible) {
-            $html .= '<details class="callout-collapsible" ' . ($isOpen ? 'open' : '') . '>';
-            $html .= '<summary class="callout-title"><div class="callout-title-inner">' . htmlspecialchars($title) . '</div></summary>';
-            $html .= '<div class="callout-content">';
-        } else {
-            $html .= '<div class="callout-title"><div class="callout-title-inner">' . htmlspecialchars($title) . '</div></div>';
-            $html .= '<div class="callout-content">';
-        }
-        $newLines[] = $html;
-    } elseif ($inCallout && preg_match('/^>(.*)$/', $line, $matches)) {
-        $newLines[] = $matches[1];
-    } else {
-        if ($inCallout) {
-            $newLines[] = $calloutCollapsible ? "</div></details></div>\n" : "</div></div>\n";
-            $inCallout = false;
-        }
-        $newLines[] = $line;
-    }
-}
-if ($inCallout) {
-    $newLines[] = $calloutCollapsible ? "</div></details></div>\n" : "</div></div>\n";
-}
-$markdownContent = implode("\n", $newLines);
-
-// 2. Embeds: ![[file]]
+// 1. Embeds: ![[file]]
 $markdownContent = preg_replace_callback('/!\[\[([^\]]+)\]\]/', function($matches) use ($currentDir, $vaultDir) {
     $target = $matches[1];
     $resolved = resolve_obsidian_link($target, $currentDir, $vaultDir);
@@ -206,6 +174,9 @@ if (is_dir('css-snippets')) {
 
     <!-- Highlight.js CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
         body { 
@@ -258,6 +229,64 @@ if (is_dir('css-snippets')) {
             // Allow marked to process HTML tags (so <span>[[halaman-lain]]</span> works seamlessly)
             const html = marked.parse(rawMd, { breaks: true, gfm: true });
             document.getElementById('content').innerHTML = html;
+
+            // Transform Blockquotes into Obsidian Callouts
+            document.querySelectorAll('#content blockquote').forEach(bq => {
+                const firstP = bq.querySelector('p');
+                if (!firstP) return;
+                
+                const htmlContent = firstP.innerHTML;
+                const match = htmlContent.match(/^\s*\[!([a-zA-Z0-9-]+)\]([\+\-]?)\s*(.*?)(?:<br>|\n|$)/i);
+                
+                if (match) {
+                    const type = match[1].toLowerCase();
+                    const fold = match[2];
+                    const titleText = match[3].trim() || type.charAt(0).toUpperCase() + type.slice(1);
+                    
+                    const isCollapsible = fold === '+' || fold === '-';
+                    const isOpen = fold === '+';
+                    
+                    const calloutWrapper = document.createElement(isCollapsible ? 'details' : 'div');
+                    calloutWrapper.className = 'callout' + (isCollapsible ? ' callout-collapsible' : '');
+                    calloutWrapper.setAttribute('data-callout', type);
+                    if (isOpen) calloutWrapper.setAttribute('open', '');
+                    
+                    const titleEl = document.createElement(isCollapsible ? 'summary' : 'div');
+                    titleEl.className = 'callout-title';
+                    
+                    if (isCollapsible) {
+                        const foldIcon = document.createElement('i');
+                        foldIcon.className = 'callout-fold';
+                        foldIcon.setAttribute('data-lucide', 'chevron-right');
+                        titleEl.appendChild(foldIcon);
+                    }
+                    
+                    const iconEl = document.createElement('div');
+                    iconEl.className = 'callout-icon';
+                    const iconI = document.createElement('i');
+                    const iconMap = { info: 'info', note: 'pencil', tip: 'flame', success: 'check-circle', question: 'help-circle', warning: 'alert-triangle', error: 'zap', bug: 'bug', example: 'list', quote: 'quote' };
+                    iconI.setAttribute('data-lucide', iconMap[type] || 'pencil');
+                    iconEl.appendChild(iconI);
+                    titleEl.appendChild(iconEl);
+                    
+                    const titleInnerEl = document.createElement('div');
+                    titleInnerEl.className = 'callout-title-inner';
+                    titleInnerEl.innerHTML = titleText;
+                    titleEl.appendChild(titleInnerEl);
+                    
+                    const contentEl = document.createElement('div');
+                    contentEl.className = 'callout-content';
+                    firstP.innerHTML = htmlContent.substring(match[0].length);
+                    while (bq.firstChild) { contentEl.appendChild(bq.firstChild); }
+                    
+                    calloutWrapper.appendChild(titleEl);
+                    calloutWrapper.appendChild(contentEl);
+                    bq.parentNode.replaceChild(calloutWrapper, bq);
+                }
+            });
+
+            // Initialize Lucide Icons
+            lucide.createIcons();
 
             // Highlight syntax
             hljs.highlightAll();
