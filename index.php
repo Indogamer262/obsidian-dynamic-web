@@ -233,6 +233,9 @@ if (is_dir('css-snippets')) {
     <!-- Highlight.js CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 
+    <!-- KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
@@ -288,6 +291,10 @@ if (is_dir('css-snippets')) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     
+    <!-- KaTeX and marked-katex-extension -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked-katex-extension/lib/index.umd.js"></script>
+    
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             // Init Mermaid
@@ -306,6 +313,7 @@ if (is_dir('css-snippets')) {
             };
             
             marked.use({ renderer });
+            marked.use(markedKatex({ throwOnError: false }));
             
             // Allow marked to process HTML tags (so <span>[[halaman-lain]]</span> works seamlessly)
             const html = marked.parse(rawMd, { breaks: true, gfm: true });
