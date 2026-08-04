@@ -105,62 +105,88 @@ function search_file_recursive($target, $dir, $skipDirs, $isMd) {
 
 // Process Markdown
 
-// 1. Embeds: ![[file]]
-$markdownContent = preg_replace_callback('/!\[\[([^\]]+)\]\]/', function($matches) use ($currentDir, $vaultDir) {
-    $content = $matches[1];
-    $content = str_replace('\|', '|', $content); // Unescape \|
-    $parts = explode('|', $content, 2);
-    $target = trim($parts[0]);
-    $alias = isset($parts[1]) ? trim($parts[1]) : '';
-    
-    $resolved = resolve_obsidian_link($target, $currentDir, $vaultDir);
-    if ($resolved) {
-        $ext = strtolower(pathinfo($resolved, PATHINFO_EXTENSION));
-        $webPath = str_replace('\\', '/', $resolved);
+function process_obsidian_markdown($content, $currentDir, $vaultDir, $visitedFiles = []) {
+    // 1. Embeds: ![[file]]
+    $content = preg_replace_callback('/!\[\[([^\]]+)\]\]/', function($matches) use ($currentDir, $vaultDir, $visitedFiles) {
+        $rawTarget = $matches[1];
+        $rawTarget = str_replace('\|', '|', $rawTarget); // Unescape \|
+        $parts = explode('|', $rawTarget, 2);
+        $target = trim($parts[0]);
+        $alias = isset($parts[1]) ? trim($parts[1]) : '';
         
-        // Handle width/height from alias
-        $style = '';
-        if (is_numeric($alias)) {
-            $style = 'width: ' . htmlspecialchars($alias) . 'px;';
-        } elseif (preg_match('/^(\d+)x(\d+)$/', $alias, $dimMatches)) {
-            $style = 'width: ' . $dimMatches[1] . 'px; height: ' . $dimMatches[2] . 'px;';
-        }
-
-        if (in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'])) {
-            return '<img src="' . htmlspecialchars($webPath) . '" alt="' . htmlspecialchars($target) . '" class="obsidian-embed image-embed" style="' . $style . '">';
-        } elseif ($ext === 'pdf') {
-            return '<iframe src="' . htmlspecialchars($webPath) . '" class="obsidian-embed pdf-embed" style="width: 100%; height: 600px; ' . $style . '"></iframe>';
-        } else {
-            return '<a href="' . htmlspecialchars($webPath) . '" class="obsidian-embed file-embed" download>' . htmlspecialchars($target) . '</a>';
-        }
-    }
-    
-    $unresolvedAlias = $alias !== '' ? '&#124;' . htmlspecialchars($alias) : '';
-    return '<span class="is-unresolved">![[' . htmlspecialchars($target) . $unresolvedAlias . ']]</span>';
-}, $markdownContent);
-
-// 3. Wikilinks: [[file]] or [[file|Alias]]
-$markdownContent = preg_replace_callback('/\[\[([^\]]+)\]\]/', function($matches) use ($currentDir, $vaultDir) {
-    $content = $matches[1];
-    $content = str_replace('\|', '|', $content); // Unescape \|
-    $parts = explode('|', $content, 2);
-    $target = trim($parts[0]);
-    $alias = isset($parts[1]) ? trim($parts[1]) : $target;
-    
-    $resolved = resolve_obsidian_link($target, $currentDir, $vaultDir);
-    if ($resolved) {
-        $ext = strtolower(pathinfo($resolved, PATHINFO_EXTENSION));
-        if ($ext === 'md') {
-            $relPath = substr($resolved, strlen($vaultDir) + 1, -3); // remove vaultDir/ and .md
-            $relPath = str_replace('\\', '/', $relPath);
-            return '<a href="?page=' . urlencode($relPath) . '" class="internal-link">' . htmlspecialchars($alias) . '</a>';
-        } else {
+        $resolved = resolve_obsidian_link($target, $currentDir, $vaultDir);
+        if ($resolved) {
+            $ext = strtolower(pathinfo($resolved, PATHINFO_EXTENSION));
             $webPath = str_replace('\\', '/', $resolved);
-            return '<a href="' . htmlspecialchars($webPath) . '" class="internal-link" target="_blank">' . htmlspecialchars($alias) . '</a>';
+            
+            // Handle width/height from alias
+            $style = '';
+            if (is_numeric($alias)) {
+                $style = 'width: ' . htmlspecialchars($alias) . 'px;';
+            } elseif (preg_match('/^(\d+)x(\d+)$/', $alias, $dimMatches)) {
+                $style = 'width: ' . $dimMatches[1] . 'px; height: ' . $dimMatches[2] . 'px;';
+            }
+
+            if ($ext === 'md') {
+                if (in_array($resolved, $visitedFiles)) {
+                    return '<span class="is-unresolved">![[' . htmlspecialchars($target) . ']] (Circular reference)</span>';
+                }
+                
+                $embedContent = file_get_contents($resolved);
+                $embedDir = dirname($resolved);
+                if ($embedDir === '.' || $embedDir === $vaultDir) {
+                    $embedDir = $vaultDir;
+                }
+                
+                $newVisited = $visitedFiles;
+                $newVisited[] = $resolved;
+                
+                $processedEmbed = process_obsidian_markdown($embedContent, $embedDir, $vaultDir, $newVisited);
+                $title = $alias !== '' ? htmlspecialchars($alias) : htmlspecialchars(basename($target));
+                
+                // Note: The blank lines (\n\n) inside the div are required for marked.js to process the content as Markdown
+                return "\n\n<div class=\"markdown-embed\">\n<div class=\"markdown-embed-content\">\n<div class=\"markdown-embed-title\" style=\"font-weight: bold; margin-bottom: 10px; opacity: 0.8;\">📄 " . $title . "</div>\n\n" . $processedEmbed . "\n\n</div>\n</div>\n\n";
+            } elseif (in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'])) {
+                return '<img src="' . htmlspecialchars($webPath) . '" alt="' . htmlspecialchars($target) . '" class="obsidian-embed image-embed" style="' . $style . '">';
+            } elseif ($ext === 'pdf') {
+                return '<iframe src="' . htmlspecialchars($webPath) . '" class="obsidian-embed pdf-embed" style="width: 100%; height: 600px; ' . $style . '"></iframe>';
+            } else {
+                return '<a href="' . htmlspecialchars($webPath) . '" class="obsidian-embed file-embed" download>' . htmlspecialchars($target) . '</a>';
+            }
         }
-    }
-    return '<a class="internal-link is-unresolved">' . htmlspecialchars($alias) . '</a>';
-}, $markdownContent);
+        
+        $unresolvedAlias = $alias !== '' ? '&#124;' . htmlspecialchars($alias) : '';
+        return '<span class="is-unresolved">![[' . htmlspecialchars($target) . $unresolvedAlias . ']]</span>';
+    }, $content);
+
+    // 2. Wikilinks: [[file]] or [[file|Alias]]
+    $content = preg_replace_callback('/\[\[([^\]]+)\]\]/', function($matches) use ($currentDir, $vaultDir) {
+        $rawTarget = $matches[1];
+        $rawTarget = str_replace('\|', '|', $rawTarget); // Unescape \|
+        $parts = explode('|', $rawTarget, 2);
+        $target = trim($parts[0]);
+        $alias = isset($parts[1]) ? trim($parts[1]) : $target;
+        
+        $resolved = resolve_obsidian_link($target, $currentDir, $vaultDir);
+        if ($resolved) {
+            $ext = strtolower(pathinfo($resolved, PATHINFO_EXTENSION));
+            if ($ext === 'md') {
+                $relPath = substr($resolved, strlen($vaultDir) + 1, -3); // remove vaultDir/ and .md
+                $relPath = str_replace('\\', '/', $relPath);
+                return '<a href="?page=' . urlencode($relPath) . '" class="internal-link">' . htmlspecialchars($alias) . '</a>';
+            } else {
+                $webPath = str_replace('\\', '/', $resolved);
+                return '<a href="' . htmlspecialchars($webPath) . '" class="internal-link" target="_blank">' . htmlspecialchars($alias) . '</a>';
+            }
+        }
+        return '<a class="internal-link is-unresolved">' . htmlspecialchars($alias) . '</a>';
+    }, $content);
+
+    return $content;
+}
+
+global $targetFile;
+$markdownContent = process_obsidian_markdown($markdownContent, $currentDir, $vaultDir, [$targetFile]);
 
 // Dynamically load CSS snippets
 $cssFiles = [];
