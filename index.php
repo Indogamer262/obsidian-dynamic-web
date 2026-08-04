@@ -252,6 +252,8 @@ if (is_dir('css-snippets')) {
             padding: 20px;
             line-height: 1.6; 
             box-sizing: border-box;
+            user-select: text;
+            -webkit-user-select: text;
         }
         
         /* Table Overrides */
