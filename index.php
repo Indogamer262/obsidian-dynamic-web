@@ -291,9 +291,8 @@ if (is_dir('css-snippets')) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     
-    <!-- KaTeX and marked-katex-extension -->
+    <!-- KaTeX -->
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked-katex-extension/lib/index.umd.js"></script>
     
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -312,8 +311,38 @@ if (is_dir('css-snippets')) {
                 return originalCode(code, language, isEscaped);
             };
             
-            marked.use({ renderer });
-            marked.use(markedKatex({ throwOnError: false }));
+            // Custom KaTeX extensions to support math inside lists/callouts
+            const blockMath = {
+                name: 'blockMath',
+                level: 'inline', // Use inline level so it parses inside lists and blockquotes
+                start(src) { return src.indexOf('$$'); },
+                tokenizer(src, tokens) {
+                    const match = /^\$\$([^]+?)\$\$/.exec(src);
+                    if (match) {
+                        return { type: 'blockMath', raw: match[0], text: match[1] };
+                    }
+                },
+                renderer(token) {
+                    return '<div class="math math-block">' + katex.renderToString(token.text, { displayMode: true, throwOnError: false }) + '</div>';
+                }
+            };
+            
+            const inlineMath = {
+                name: 'inlineMath',
+                level: 'inline',
+                start(src) { return src.indexOf('$'); },
+                tokenizer(src, tokens) {
+                    const match = /^\$([^$\n]+?)\$/.exec(src);
+                    if (match) {
+                        return { type: 'inlineMath', raw: match[0], text: match[1] };
+                    }
+                },
+                renderer(token) {
+                    return '<span class="math math-inline">' + katex.renderToString(token.text, { displayMode: false, throwOnError: false }) + '</span>';
+                }
+            };
+            
+            marked.use({ renderer, extensions: [blockMath, inlineMath] });
             
             // Allow marked to process HTML tags (so <span>[[halaman-lain]]</span> works seamlessly)
             const html = marked.parse(rawMd, { breaks: true, gfm: true });
