@@ -107,8 +107,9 @@ function search_file_recursive($target, $dir, $skipDirs, $isMd) {
 
 function process_obsidian_markdown($content, $currentDir, $vaultDir, $visitedFiles = []) {
     // 1. Embeds: ![[file]]
-    $content = preg_replace_callback('/!\[\[([^\]]+)\]\]/', function($matches) use ($currentDir, $vaultDir, $visitedFiles) {
-        $rawTarget = $matches[1];
+    $content = preg_replace_callback('/(?:^([ \t]*>[ \t>]*))?!\[\[([^\]]+)\]\]/m', function($matches) use ($currentDir, $vaultDir, $visitedFiles) {
+        $prefix = isset($matches[1]) ? $matches[1] : '';
+        $rawTarget = $matches[2];
         $rawTarget = str_replace('\|', '|', $rawTarget); // Unescape \|
         $parts = explode('|', $rawTarget, 2);
         $target = trim($parts[0]);
@@ -129,7 +130,8 @@ function process_obsidian_markdown($content, $currentDir, $vaultDir, $visitedFil
 
             if ($ext === 'md') {
                 if (in_array($resolved, $visitedFiles)) {
-                    return '<span class="is-unresolved">![[' . htmlspecialchars($target) . ']] (Circular reference)</span>';
+                    $errHtml = '<span class="is-unresolved">![[' . htmlspecialchars($target) . ']] (Circular reference)</span>';
+                    return $prefix !== '' ? $prefix . $errHtml : $errHtml;
                 }
                 
                 $embedContent = file_get_contents($resolved);
@@ -145,18 +147,32 @@ function process_obsidian_markdown($content, $currentDir, $vaultDir, $visitedFil
                 $title = $alias !== '' ? htmlspecialchars($alias) : htmlspecialchars(basename($target));
                 
                 // Note: The blank lines (\n\n) inside the div are required for marked.js to process the content as Markdown
-                return "\n\n<div class=\"markdown-embed\">\n<div class=\"markdown-embed-content\">\n<div class=\"markdown-embed-title\" style=\"font-weight: bold; margin-bottom: 10px; opacity: 0.8;\">📄 " . $title . "</div>\n\n" . $processedEmbed . "\n\n</div>\n</div>\n\n";
+                $wrapperHtml = "\n\n<div class=\"markdown-embed\">\n<div class=\"markdown-embed-content\">\n<div class=\"markdown-embed-title\" style=\"font-weight: bold; margin-bottom: 10px; opacity: 0.8;\">📄 " . $title . "</div>\n\n" . $processedEmbed . "\n\n</div>\n</div>\n\n";
+                
+                if ($prefix !== '') {
+                    $lines = explode("\n", $wrapperHtml);
+                    $lines = array_map(function($line) use ($prefix) {
+                        return $line === '' ? rtrim($prefix) : $prefix . $line;
+                    }, $lines);
+                    $wrapperHtml = implode("\n", $lines);
+                }
+                
+                return $wrapperHtml;
             } elseif (in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'])) {
-                return '<img src="' . htmlspecialchars($webPath) . '" alt="' . htmlspecialchars($target) . '" class="obsidian-embed image-embed" style="' . $style . '">';
+                $imgHtml = '<img src="' . htmlspecialchars($webPath) . '" alt="' . htmlspecialchars($target) . '" class="obsidian-embed image-embed" style="' . $style . '">';
+                return $prefix !== '' ? $prefix . $imgHtml : $imgHtml;
             } elseif ($ext === 'pdf') {
-                return '<iframe src="' . htmlspecialchars($webPath) . '" class="obsidian-embed pdf-embed" style="width: 100%; height: 600px; ' . $style . '"></iframe>';
+                $pdfHtml = '<iframe src="' . htmlspecialchars($webPath) . '" class="obsidian-embed pdf-embed" style="width: 100%; height: 600px; ' . $style . '"></iframe>';
+                return $prefix !== '' ? $prefix . $pdfHtml : $pdfHtml;
             } else {
-                return '<a href="' . htmlspecialchars($webPath) . '" class="obsidian-embed file-embed" download>' . htmlspecialchars($target) . '</a>';
+                $fileHtml = '<a href="' . htmlspecialchars($webPath) . '" class="obsidian-embed file-embed" download>' . htmlspecialchars($target) . '</a>';
+                return $prefix !== '' ? $prefix . $fileHtml : $fileHtml;
             }
         }
         
         $unresolvedAlias = $alias !== '' ? '&#124;' . htmlspecialchars($alias) : '';
-        return '<span class="is-unresolved">![[' . htmlspecialchars($target) . $unresolvedAlias . ']]</span>';
+        $unresHtml = '<span class="is-unresolved">![[' . htmlspecialchars($target) . $unresolvedAlias . ']]</span>';
+        return $prefix !== '' ? $prefix . $unresHtml : $unresHtml;
     }, $content);
 
     // 2. Wikilinks: [[file]] or [[file|Alias]]

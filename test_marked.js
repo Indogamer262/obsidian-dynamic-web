@@ -1,9 +1,7 @@
 const marked = require('marked');
-const md = `<div class="markdown-embed">
-
+const md = `> [!note]-
+> <span class="markdown-embed" style="display:block">
 # Hello
-
 This is **markdown**.
-
-</div>`;
+</span>`;
 console.log(marked.parse(md));
