@@ -196,7 +196,7 @@ if (is_dir('css-snippets')) {
     
     <style>
         html, body {
-            margin: 0; padding: 20px; font-family: var(--font-text); 
+            margin: 0; padding: 0; font-family: var(--font-text); 
             background-color: var(--background-primary, #1e1e1e); 
             color: var(--text-normal, #dcddde); 
             overflow-y: auto !important; /* Allow scrolling */
@@ -207,7 +207,9 @@ if (is_dir('css-snippets')) {
         .markdown-rendered { 
             max-width: 800px; /* Revert to 800px as user preferred */
             margin: 0 auto; 
+            padding: 20px;
             line-height: 1.6; 
+            box-sizing: border-box;
         }
         
         /* Table Overrides */
@@ -229,10 +231,6 @@ if (is_dir('css-snippets')) {
         a.internal-link:hover { text-decoration: underline; }
         
         /* Fallback styling if not provided by app.css */
-        .callout { border: 1px solid var(--background-modifier-border); border-radius: 4px; padding: 12px; margin: 1em 0; background-color: var(--background-secondary); }
-        .callout-title { font-weight: bold; margin-bottom: 8px; }
-        details.callout-collapsible summary { cursor: pointer; font-weight: bold; }
-        details.callout-collapsible > .callout-content { margin-top: 8px; }
         img.obsidian-embed { max-width: 100%; border-radius: 4px; }
     </style>
 </head>
